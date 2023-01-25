@@ -19,13 +19,29 @@ class checkpointsave:
     self.iteration = iteration
     self.times_run = times_run
 
+def configure_for_performance(ds):
+  ds = ds.cache()
+  ds = ds.shuffle(buffer_size=1000)
+  ds = ds.batch(5)
+  ds = ds.prefetch(buffer_size="AUTOTUNE")
+  return ds
 
+def comma_addremove(closer, f):
+  f = open("storage.json", "w")
+  lines = f.read()
+  if [-1] is ",":
+    f.write(lines[:-1])
+  else:
+    f.write(lines + ",")
+  if closer is True:
+    f.close()
+  else:
+    return f
 
 # Variable initialization along with object
-savept = checkpointsave(None, 0, 0)
 (train_ds, val_ds, test_ds), metadata = tfds.load(
-    'tf_images',
-    split=['train[:80%]', 'train[80%:90%]', 'train[90%:]'],
+    'sun397',
+    split=['train[:80%]', 'train[80%:90%]', 'train[90%:]', 'test[:50%]'],
     with_info=True,
     as_supervised=True,
 )
@@ -41,23 +57,27 @@ while True:
       print("Invalid input. Try again.")
   except Exception:
       print("Unknown exception occurred.")
+# empty variables due to how python clears memory based upon scope
 
+f = None
+model = None
+savept = None
 
 if os.stat("storage.json").st_size == 0:
   model = tf.keras.Sequential([
       tf.keras.layers.Flatten(input_shape=(28, 28)),
-      tf.keras.layers.Dense(128, activation='relu'),
-      tf.keras.layers.Dense(64, activation='relu'),
-      tf.keras.layers.Dense(10)
+      tf.keras.layers.Dense(128, activation='elu'),
+      tf.keras.layers.Dense(128, activation='elu'),
+      tf.keras.layers.Dense(64, activation='leaky_relu'),
+      tf.keras.layers.Dense(32, activation='leaky_relu'),
+      tf.keras.layers.Dense(10, activation='softmax')
   ])
+  savept = checkpointsave(None, 0, 0)
 else:
-  f.open("storage.json", "w")
-  lines = f.read()
-  if [-1] is ",":
-    f.write(lines[:-1])
-    model = tf.keras.models.load_model('model.h5')
-json.load(f)
-f.close()
+  model = tf.keras.models.load_model('model.h5')
+  f = comma_addremove(False, f)
+  json.load(f)
+  f.close()
 
 print("Compiling Model...")
 
@@ -88,7 +108,7 @@ while iterator != uinput:
 
   if image.next() != None:
     image, label = next(image), next(label)
-    
+
     get_label_name = metadata.features['label'].int2str
   _ = mplpy.imshow(image)
   _ = mplpy.title(get_label_name(label))
@@ -100,7 +120,7 @@ print("Training ended. Creating savepoint.")
 
 # save method, first step announces it is opening file, and saving
 print("Saving data...")
-model.save('model.h5')j
+model.save('model.h5')
 checkpointsave.savept = "model.h5"
 f = open("storage.json", "w")
 # attempts to dump py object into a json object in the file
