@@ -40,7 +40,7 @@ def comma_addremove(closer, f):
 
 # Variable initialization along with object
 (train_ds, val_ds, test_ds), metadata = tfds.load(
-    'sun397',
+    'cifar-100',
     split=['train[:80%]', 'train[80%:90%]', 'train[90%:]', 'test[:50%]'],
     with_info=True,
     as_supervised=True,
