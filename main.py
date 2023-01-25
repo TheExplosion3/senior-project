@@ -34,14 +34,14 @@ model = tf.keras.Sequential([
 
 print("Current Model Statistics:")
 model.summmary()
-
+print("Training Beginning...")
 while iterator != uinput:
   iterator+=1
   pass
 # Adds the correct amount of iterations to the count, amount of times run increases by 1 as well.
 checkpointsave.runner += 1
 checkpointsave.iteration = checkpointsave.iteration + iterator
-
+print("Training ended.")
 
 # safe method, first step announces it is opening file, and saving
 print("Saving Data...")
