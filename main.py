@@ -12,9 +12,7 @@ import PIL
 import PIL.Image
 import os
 # file imports
-from fn.py import checkpointsave
-from fn.py import configure_for_performance
-from fn.py import comma_addremove
+from fn import *
 
 
 
