@@ -11,32 +11,12 @@ import json
 import PIL
 import PIL.Image
 import os
+# file imports
+from fn.py import checkpointsave
+from fn.py import configure_for_performance
+from fn.py import comma_addremove
 
-# Object with iteration of training, and times training has been run, along with the weight data from the model
-class checkpointsave:
-  def __init(self, data, iteration, times_run):
-    self.data = data
-    self.iteration = iteration
-    self.times_run = times_run
 
-def configure_for_performance(ds):
-  ds = ds.cache()
-  ds = ds.shuffle(buffer_size=1000)
-  ds = ds.batch(5)
-  ds = ds.prefetch(buffer_size="AUTOTUNE")
-  return ds
-
-def comma_addremove(closer, f):
-  f = open("storage.json", "w")
-  lines = f.read()
-  if [-1] is ",":
-    f.write(lines[:-1])
-  else:
-    f.write(lines + ",")
-  if closer is True:
-    f.close()
-  else:
-    return f
 
 # Variable initialization along with object
 (train_ds, val_ds, test_ds), metadata = tfds.load(
