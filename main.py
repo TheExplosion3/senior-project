@@ -12,21 +12,21 @@ import PIL
 import PIL.Image
 import os
 # file imports
-from fn import *
-
-
+from fn import checkpointsave, comma_addremove, configure_for_performance
 
 # Variable initialization along with object
 (train_ds, val_ds, test_ds), metadata = tfds.load(
     'cifar-100',
-    split=['train[:80%]', 'train[80%:90%]', 'train[90%:]', 'test[:50%]'],
+    split=['train[:80%]', 'val[80%:90%]', 'test[90%:]'],
     with_info=True,
     as_supervised=True,
 )
 
+# set up iterator
 iterator = 0
-print("Iterate for how many times? ")
 
+# user input grabber, with exception handling
+print("Iterate for how many times? ")
 while True:
   try:
     uinput = int(input())
@@ -35,20 +35,28 @@ while True:
       print("Invalid input. Try again.")
   except Exception:
       print("Unknown exception occurred.")
+    
 # empty variables due to how python clears memory based upon scope
 
 f = None
 model = None
 savept = None
 
+# checks if the model has been created in the past, if not then it grabs it elsewhere
 if os.stat("storage.json").st_size == 0:
   model = tf.keras.Sequential([
       tf.keras.layers.Flatten(input_shape=(28, 28)),
       tf.keras.layers.Dense(128, activation='elu'),
+      tf.keras.layer.Dropout(0.5),
       tf.keras.layers.Dense(128, activation='elu'),
+      tf.keras.layer.Dropout(0.5),
       tf.keras.layers.Dense(64, activation='leaky_relu'),
+      tf.keras.layer.Dropout(0.5),
       tf.keras.layers.Dense(32, activation='leaky_relu'),
-      tf.keras.layers.Dense(10, activation='softmax')
+      tf.keras.layer.Dropout(0.5),
+      tf.keras.layers.Dense(10, activation='leaky_relu'),
+      tf.keras.layer.Dropout(0.5),
+      tf.keras.layers.Dense(5, activation ='softmax')
   ])
   savept = checkpointsave(None, 0, 0)
 else:
@@ -68,6 +76,7 @@ print("Model Compiled.")
 print("Current Model Statistics:")
 model.summmary()
 print(f"Training beginning, running {uinput} time(s)")
+
 
 image, label = next(iter(train_ds))
 get_label_name = metadata.features['label'].int2str
