@@ -6,10 +6,7 @@ import tensorflow_datasets as tfds
 # standard imports
 import matplotlib as mpl
 import matplotlib.pyplot as mplpy
-import numpy as np
 import json
-import PIL
-import PIL.Image
 import os
 # file imports
 from fn import checkpointsave, comma_addremove, configure_for_performance
