@@ -39,18 +39,24 @@ savept = None
 # checks if the model has been created in the past, if not then it grabs it elsewhere
 if os.stat("storage.json").st_size == 0:
   model = tf.keras.Sequential([
-      tf.keras.layers.Flatten(input_shape=(32, 32)),
-      tf.keras.layers.Dense(128, activation='elu'),
-      tf.keras.layer.Dropout(0.5),
-      tf.keras.layers.Dense(128, activation='elu'),
-      tf.keras.layer.Dropout(0.5),
+      tf.keras.layers.Conv2D(256, (3, 3), activation='elu', input_shape=(32, 32, 3)),
+      tf.keras.layers.MaxPooling2D((2, 2)),
+      tf.keras.layers.Conv2D(256, (3, 3), activation='elu'),
+      tf.keras.layers.MaxPooling2D((2, 2)),
+      tf.keras.layers.Conv2D(256, (3, 3), activation='elu'),
+      tf.keras.layers.Flatten(),
+      tf.keras.layers.Dense(128, activation='leaky_relu'),
+      tf.keras.layers.Dropout(0.5),
+      tf.keras.layers.Dense(128, activation='leaky_relu'),
+      tf.keras.layers.Dropout(0.5),
       tf.keras.layers.Dense(64, activation='leaky_relu'),
-      tf.keras.layer.Dropout(0.5),
+      tf.keras.layers.Dropout(0.5),
       tf.keras.layers.Dense(32, activation='leaky_relu'),
-      tf.keras.layer.Dropout(0.5),
+      tf.keras.layers.Dropout(0.5),
       tf.keras.layers.Dense(10, activation='leaky_relu'),
-      tf.keras.layer.Dropout(0.5),
-      tf.keras.layers.Dense(5, activation ='softmax')
+      tf.keras.layers.Dropout(0.5),
+      tf.keras.layers.Dense(5, activation ='softmax'),
+      tf.keras.layers.Dense(5)
   ])
   savept = checkpointsave(None, 0, 0)
 else:
