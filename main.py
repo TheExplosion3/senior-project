@@ -46,26 +46,23 @@ data_augmentation = keras.Sequential(
 )
 
 # checks if the model has been created in the past, if not then it grabs it elsewhere
+# amt of nodes on input layer: 4
+# amt of nodes per hidden layer: 37/38
+# amt of nodes on output layer: 100
 if os.stat("storage.json").st_size == 0:
   model = tf.keras.Sequential([
-      tf.keras.layers.Conv2D(256, (3, 3), activation='elu', input_shape=(32, 32, 3)),
+      data_augmentation,
+      tf.keras.layers.Rescaling(1./255),
+      tf.keras.layers.Conv2D(4, (3, 3), activation='elu', input_shape=(32, 32, 3)),
       tf.keras.layers.MaxPooling2D((2, 2)),
-      tf.keras.layers.Conv2D(256, (3, 3), activation='elu'),
+      tf.keras.layers.Conv2D(32, (3, 3), activation='elu'),
       tf.keras.layers.MaxPooling2D((2, 2)),
-      tf.keras.layers.Conv2D(256, (3, 3), activation='elu'),
+      tf.keras.layers.Conv2D(32, (3, 3), activation='elu'),
       tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(128, activation='leaky_relu'),
+      tf.keras.layers.Dense(37, activation='leaky_relu'),
+      tf.keras.layers.Dense(38, activation='leaky_relu'),
       tf.keras.layers.Dropout(0.5),
-      tf.keras.layers.Dense(128, activation='leaky_relu'),
-      tf.keras.layers.Dropout(0.5),
-      tf.keras.layers.Dense(64, activation='leaky_relu'),
-      tf.keras.layers.Dropout(0.5),
-      tf.keras.layers.Dense(32, activation='leaky_relu'),
-      tf.keras.layers.Dropout(0.5),
-      tf.keras.layers.Dense(10, activation='leaky_relu'),
-      tf.keras.layers.Dropout(0.5),
-      tf.keras.layers.Dense(5, activation ='softmax'),
-      tf.keras.layers.Dense(5)
+      tf.keras.layers.Dense(100)
   ])
   savept = checkpointsave(None, 0, 0)
 else:
