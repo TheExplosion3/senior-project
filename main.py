@@ -9,7 +9,7 @@ import matplotlib.pyplot as mplpy
 import json
 import os
 # file imports
-from fn import checkpointsave, comma_addremove, configure_for_performance
+from fn import checkpointsave, comma_addremove, configure_for_performance, safeinput
 
 # Variable initialization along with object
 (train_ds, val_ds, test_ds), metadata = tfds.load(
@@ -19,19 +19,16 @@ from fn import checkpointsave, comma_addremove, configure_for_performance
     as_supervised=True,
 )
 
-# set up iterator
+# set up known vars
 iterator = 0
+iterations = 0
+saveattempts = 0
 
 # user input grabber, with exception handling
 print("Iterate for how many times? ")
-while True:
-  try:
-    uinput = int(input())
-    break
-  except TypeError:
-      print("Invalid input. Try again.")
-  except Exception:
-      print("Unknown exception occurred.")
+safeinput(iterations, "i")
+print("Amount of times to attempt saving? ")
+safeinput(saveattempts, "i")
     
 # empty variables due to how python clears memory based upon scope
 
@@ -42,7 +39,7 @@ savept = None
 # checks if the model has been created in the past, if not then it grabs it elsewhere
 if os.stat("storage.json").st_size == 0:
   model = tf.keras.Sequential([
-      tf.keras.layers.Flatten(input_shape=(28, 28)),
+      tf.keras.layers.Flatten(input_shape=(32, 32)),
       tf.keras.layers.Dense(128, activation='elu'),
       tf.keras.layer.Dropout(0.5),
       tf.keras.layers.Dense(128, activation='elu'),
@@ -64,7 +61,7 @@ else:
 
 print("Compiling Model...")
 
-model.compile(optimizer='adam',
+model.compile(optimizer='nadam',
 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
@@ -72,7 +69,7 @@ print("Model Compiled.")
 
 print("Current Model Statistics:")
 model.summmary()
-print(f"Training beginning, running {uinput} time(s)")
+print(f"Training beginning, running {iterations} time(s)")
 
 
 image, label = next(iter(train_ds))
@@ -84,7 +81,7 @@ train_ds = configure_for_performance(train_ds)
 val_ds = configure_for_performance(val_ds)
 test_ds = configure_for_performance(test_ds)
 
-while iterator != uinput:
+while iterator != iterations:
 
   model.fit(image, label, epochs=10)
 
@@ -106,21 +103,25 @@ print("Training ended. Creating savepoint.")
 print("Saving data...")
 model.save('model.h5')
 checkpointsave.savept = "model.h5"
-f = open("storage.json", "w")
+f = open("storage.json", "a")
 # attempts to dump py object into a json object in the file
 try:
   json.dump(savept, f, indent = 6)
 # if it fails it excepts any exceptions and tries 4 more times, announcing exception and try attempt each time
 except Exception:
-  for i in range(4):
-    try:
-      print(f"Save failed, trying again.\nAttempt number: {i}\nException: {Exception}")
-      json.dump(savept, f, indent = 6)
-      f.write(',')
-      break
-    except:
+  if saveattempts:
+    for i in range(saveattempts - 1):
+      try:
+        print(f"Save failed, trying again.\nAttempt number: {i}\nException: {Exception}")
+        json.dump(savept, f, indent = 6)
+        break
+      except:
+        pass
       print("Max number of attempts reached, exiting without save.")
+else:
+  print("Save successful.")
 # Announces the process complete, closes the file, program terminates.
 finally:
+  f.write(",")
   print("Saving process complete.")
   f.close()

@@ -14,7 +14,7 @@ def configure_for_performance(ds):
 def comma_addremove(closer, f):
   f = open("storage.json", "w")
   lines = f.read()
-  if [-1] is ",":
+  if [-1] == ",":
     f.write(lines[:-1])
   else:
     f.write(lines + ",")
@@ -22,3 +22,27 @@ def comma_addremove(closer, f):
     f.close()
   else:
     return f
+
+def safeinput(var, type):
+  while True:
+    try: 
+      if type == "s":
+        var = input()
+      elif type == "i":
+        var = int(input())
+      elif type == "f"():
+        var = float(input())
+      elif type == "b":
+        var = input()
+        var = bool(var[0].upper() + var[1:])
+      elif type == "c":
+        var = complex(input())
+      else:
+        raise TypeError
+      break
+    except TypeError:
+        print("Invalid input. Try again.")
+    except Exception:
+        print("Unknown exception occurred.")
+  return var
+      
