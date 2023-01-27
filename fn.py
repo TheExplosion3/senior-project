@@ -1,3 +1,5 @@
+import tensorflow as tf
+
 class checkpointsave:
   def __init__(self, data, iteration, times_run):
     self.data = data
@@ -45,4 +47,3 @@ def safeinput(var, type):
     except Exception:
         print("Unknown exception occurred.")
   return var
-      
