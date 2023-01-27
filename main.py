@@ -36,6 +36,15 @@ f = None
 model = None
 savept = None
 
+# randomly rotates, zooms, and flips images to introduce more realistic cases for the image, i don't know how it integrates yet though.
+data_augmentation = keras.Sequential(
+  [
+    tf.keras.layers.RandomFlip("horizontal", input_shape=(32,32,3)),
+    tf.keras.layers.RandomRotation(0.1),
+    tf.keras.layers.RandomZoom(0.1),
+  ]
+)
+
 # checks if the model has been created in the past, if not then it grabs it elsewhere
 if os.stat("storage.json").st_size == 0:
   model = tf.keras.Sequential([
