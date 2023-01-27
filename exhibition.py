@@ -6,6 +6,8 @@ import tensorflow_datasets as tfds
 # standard imports
 import matplotlib as mpl
 import matplotlib.pyplot as mplpy
+import PIL
+import PIL.Image
 import json
 import os
 # file imports
