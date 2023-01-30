@@ -1,11 +1,5 @@
 import tensorflow as tf
 
-class checkpointsave:
-  def __init__(self, data, iteration, times_run):
-    self.data = data
-    self.iteration = iteration
-    self.times_run = times_run
-
 def configure_for_performance(ds):
   ds = ds.cache()
   ds = ds.shuffle(buffer_size=1000)
