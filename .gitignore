@@ -128,5 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# stuff i added (i don't feel like categorizing it)
 .replit
 replit.nix

@@ -4,7 +4,7 @@ def configure_for_performance(ds):
   ds = ds.cache()
   ds = ds.shuffle(buffer_size=1000)
   ds = ds.batch(5)
-  ds = ds.prefetch(buffer_size="AUTOTUNE")
+  ds = ds.prefetch(buffer_size=tf.data.AUTOTUNE)
   return ds
 
 def comma_addremove(closer, f):
@@ -21,7 +21,7 @@ def comma_addremove(closer, f):
 
 def safeinput(var, type):
   while True:
-    try: 
+    try:
       if type == "s":
         var = input()
       elif type == "i":

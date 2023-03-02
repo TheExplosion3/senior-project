@@ -11,9 +11,9 @@ from fn import comma_addremove, configure_for_performance, safeinput
 
 
 # Variable initialization
-(train_ds, val_ds, test_ds), metadata = tfds.load(
-    'cifar-100',
-    split=['train[:80%]', 'val[80%:90%]', 'test[90%:]'],
+(train_ds, test_ds), metadata = tfds.load(
+    'cifar100',
+    split=['train[:80%]', 'test[90%:]'],
     with_info=True,
     as_supervised=True,
 )
@@ -24,9 +24,9 @@ epochs = 0
 # user input grabber, with exception handling
 print("How many epochs?")
 safeinput(epochs, "i")
-    
+
 # empty variables due to how python clears memory based upon scope
-f, model = None
+f, model = None, None
 
 # randomly rotates, zooms, and flips images to introduce more realistic cases for the image, i don't know how it integrates yet though.
 data_augmentation = keras.Sequential(
@@ -46,7 +46,7 @@ resize_and_rescale = tf.keras.Sequential([
 # amt of nodes on input layer: 4
 # amt of nodes per hidden layer: 37/38
 # amt of nodes on output layer: 100
-if os.stat("storage.json").st_size == 0:
+if os.stat("model_save/model.h5").st_size == 0:
   model = tf.keras.Sequential([
       resize_and_rescale,
       data_augmentation,
@@ -62,7 +62,7 @@ if os.stat("storage.json").st_size == 0:
       tf.keras.layers.Dense(num_classes)
   ])
 else:
-  model = tf.keras.models.load_model('model_save/model')
+  model = tf.keras.models.load_model('model_save/model.h5')
   f = comma_addremove(False, f)
   json.load(f)
   f.close()
@@ -74,8 +74,10 @@ loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['
 
 print("Model Compiled.")
 
-print("Current Model Statistics:")
-model.summmary()
+if os.stat("model_save/model.h5").st_size != 0:
+  print("Current Model Statistics:")
+  model.summmary()
+
 print(f"Training beginning, running {epochs} epoch(s)")
 
 
@@ -85,12 +87,11 @@ _ = mplpy.imshow(image)
 _ = mplpy.title(get_label_name(label))
 
 train_ds = configure_for_performance(train_ds)
-val_ds = configure_for_performance(val_ds)
 test_ds = configure_for_performance(test_ds)
 ### training phase ###
 while True:
 
-  model.fit(image, label, epochs, validation_data=val_ds)
+  model.fit(image, label, epochs)
 
   if image.next() != None:
     image, label = next(image), next(label)
@@ -109,5 +110,5 @@ print("Training ended. Creating savepoint.")
 ### saving phase ###
 # save method, first step announces it is opening file, and saving
 print("Saving data...")
-model.save('model_save/model')
+model.save('model_save/model.h5')
 print("Save complete.")
