@@ -19,19 +19,19 @@ def comma_addremove(closer, f):
   else:
     return f
 
-def safeinput(var, type):
+def safeinput(var, vartype):
   while True:
     try:
-      if type == "s":
+      if vartype == "s":
         var = input()
-      elif type == "i":
+      elif vartype == "i":
         var = int(input())
-      elif type == "f"():
+      elif vartype == "f":
         var = float(input())
-      elif type == "b":
+      elif vartype == "b":
         var = input()
         var = bool(var[0].upper() + var[1:])
-      elif type == "c":
+      elif vartype == "c":
         var = complex(input())
       else:
         raise TypeError
