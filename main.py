@@ -23,7 +23,7 @@ epochs = 0
 
 # user input grabber, with exception handling
 print("How many epochs?")
-safeinput(epochs, "i")
+epochs = safeinput(epochs, "i")
 
 # empty variables due to how python clears memory based upon scope
 f, model = None, None
@@ -37,18 +37,14 @@ data_augmentation = keras.Sequential(
   ]
 )
 
-resize_and_rescale = tf.keras.Sequential([
-  tf.keras.layers.Resizing(180, 180),
-  tf.keras.layers.Rescaling(1./255)
-])
-
 # checks if the model has been created in the past, if not then it grabs it elsewhere
+
+# stats:
 # amt of nodes on input layer: 4
 # amt of nodes per hidden layer: 37/38
 # amt of nodes on output layer: 100
 if os.stat("model_save/model.h5").st_size == 0:
   model = tf.keras.Sequential([
-      resize_and_rescale,
       data_augmentation,
       tf.keras.layers.Conv2D(4, (3, 3), activation='elu', input_shape=(32, 32, 3)),
       tf.keras.layers.MaxPooling2D((2, 2)),
@@ -80,7 +76,6 @@ if os.stat("model_save/model.h5").st_size != 0:
 
 print(f"Training beginning, running {epochs} epoch(s)")
 
-
 image, label = next(iter(train_ds))
 get_label_name = metadata.features['label'].int2str
 _ = mplpy.imshow(image)
@@ -88,27 +83,21 @@ _ = mplpy.title(get_label_name(label))
 
 train_ds = configure_for_performance(train_ds)
 test_ds = configure_for_performance(test_ds)
-### training phase ###
-while True:
+
+for image, label in train_ds:  # example is (image, label)
+  print(image.shape, label)
 
   model.fit(image, label, epochs)
+  
 
-  if image.next() != None:
-    image, label = next(image), next(label)
+# loss, acc = model.evaluate(test_ds)
+# print("Accuracy: ", acc)
+# print("Loss: " , loss)
+# # Adds the correct amount of iterations to the count, amount of times run increases by 1 as well.
+# print("Training ended. Creating savepoint.")
 
-    get_label_name = metadata.features['label'].int2str
-    _ = mplpy.imshow(image)
-    _ = mplpy.title(get_label_name(label))
-  else:
-    break
-
-loss, acc = model.evaluate(test_ds)
-print("Accuracy: ", acc)
-# Adds the correct amount of iterations to the count, amount of times run increases by 1 as well.
-print("Training ended. Creating savepoint.")
-
-### saving phase ###
-# save method, first step announces it is opening file, and saving
-print("Saving data...")
-model.save('model_save/model.h5')
-print("Save complete.")
+# ### saving phase ###
+# # save method, first step announces it is opening file, and saving
+# print("Saving data...")
+# model.save('model_save/model.h5')
+# print("Save complete.")
