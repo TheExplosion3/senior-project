@@ -19,11 +19,7 @@ from fn import comma_addremove, configure_for_performance, safeinput
 )
 
 num_classes = metadata.features['label'].num_classes
-epochs = 0
-
-# user input grabber, with exception handling
-print("How many epochs?")
-epochs = safeinput(epochs, "i")
+epochs = 10
 
 # empty variables due to how python clears memory based upon scope
 f, model = None, None
@@ -36,7 +32,6 @@ data_augmentation = keras.Sequential(
     tf.keras.layers.RandomZoom(0.1),
   ]
 )
-
 # checks if the model has been created in the past, if not then it grabs it elsewhere
 
 # stats:
@@ -46,16 +41,16 @@ data_augmentation = keras.Sequential(
 if os.stat("model_save/model.h5").st_size == 0:
   model = tf.keras.Sequential([
       data_augmentation,
-      tf.keras.layers.Conv2D(4, (3, 3), activation='elu', input_shape=(32, 32, 3)),
+      tf.keras.layers.Conv2D(4, (3, 3), padding='same', activation='elu', input_shape=(32, 32, 3)),
       tf.keras.layers.MaxPooling2D((2, 2)),
-      tf.keras.layers.Conv2D(32, (3, 3), activation='elu'),
+      tf.keras.layers.Conv2D(32, (3, 3), padding='same', activation='elu'),
       tf.keras.layers.MaxPooling2D((2, 2)),
-      tf.keras.layers.Conv2D(32, (3, 3), activation='elu'),
+      tf.keras.layers.Conv2D(32, (3, 3), padding='same', activation='elu'),
       tf.keras.layers.Flatten(),
       tf.keras.layers.Dropout(0.5),
       tf.keras.layers.Dense(37, activation='leaky_relu'),
       tf.keras.layers.Dense(38, activation='leaky_relu'),
-      tf.keras.layers.Dense(num_classes)
+      tf.keras.layers.Dense(num_classes, activation='sigmoid')
   ])
 else:
   model = tf.keras.models.load_model('model_save/model.h5')
