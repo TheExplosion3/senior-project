@@ -7,7 +7,7 @@ import matplotlib.pyplot as mplpy
 import json
 import os
 # file imports
-from fn import comma_addremove, configure_for_performance, safeinput
+from fn import comma_addremove, configure_for_performance
 
 
 # Variable initialization
@@ -20,6 +20,8 @@ from fn import comma_addremove, configure_for_performance, safeinput
 
 num_classes = metadata.features['label'].num_classes
 epochs = 10
+batch_size = 5
+steps_per_epoch = len(train_ds)//batch_size
 
 # empty variables due to how python clears memory based upon scope
 f, model = None, None
@@ -60,8 +62,18 @@ else:
 
 print("Compiling Model...")
 
-model.compile(optimizer='nadam',
-loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy'])
+lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
+  0.001,
+  decay_steps=steps_per_epoch*1000,
+  decay_rate=1,
+  staircase=False)
+
+def get_optimizer():
+  return tf.keras.optimizers.experimental.Nadam(lr_schedule)
+
+
+model.compile(optimizer=get_optimizer(),
+loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy', 'mae'])
 
 print("Model Compiled.")
 
@@ -82,17 +94,17 @@ test_ds = configure_for_performance(test_ds)
 for image, label in train_ds:  # example is (image, label)
   print(image.shape, label)
 
-  model.fit(image, label, epochs)
+  model.fit(image, label, epochs, steps_per_epoch)
   
 
-# loss, acc = model.evaluate(test_ds)
-# print("Accuracy: ", acc)
-# print("Loss: " , loss)
-# # Adds the correct amount of iterations to the count, amount of times run increases by 1 as well.
-# print("Training ended. Creating savepoint.")
+loss, acc = model.evaluate(test_ds)
+print("Accuracy: ", acc)
+print("Loss: " , loss)
+# Adds the correct amount of iterations to the count, amount of times run increases by 1 as well.
+print("Training ended. Creating savepoints.")
 
-# ### saving phase ###
-# # save method, first step announces it is opening file, and saving
-# print("Saving data...")
-# model.save('model_save/model.h5')
-# print("Save complete.")
+### saving phase ###
+# save method, first step announces it is opening file, and saving
+print("Saving data...")
+model.save('model_save/model.h5')
+print("Save complete.")
