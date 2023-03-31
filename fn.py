@@ -1,8 +1,10 @@
 import tensorflow as tf
 
+# quite literally just makes the model's optimizer, gives it a learning schedule, then returns it.
 def get_optimizer(lr_schedule):
   return tf.keras.optimizers.experimental.Nadam(lr_schedule)
 
+# configures the dataset for performance
 def configure_for_performance(ds):
   ds = ds.cache()
   ds = ds.shuffle(buffer_size=1000)
@@ -10,18 +12,7 @@ def configure_for_performance(ds):
   ds = ds.prefetch(buffer_size=tf.data.AUTOTUNE)
   return ds
 
-def comma_addremove(closer, f):
-  f = open("storage.json", "w")
-  lines = f.read()
-  if [-1] == ",":
-    f.write(lines[:-1])
-  else:
-    f.write(lines + ",")
-  if closer is True:
-    f.close()
-  else:
-    return f
-
+# a function that makes sure all user input is safe, and is not of an invalid type. the code will handle it by erroring out, at the moment.
 def safeinput(var, vartype):
   while True:
     try:
