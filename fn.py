@@ -1,5 +1,8 @@
 import tensorflow as tf
 
+def get_optimizer(lr_schedule):
+  return tf.keras.optimizers.experimental.Nadam(lr_schedule)
+
 def configure_for_performance(ds):
   ds = ds.cache()
   ds = ds.shuffle(buffer_size=1000)

@@ -11,7 +11,7 @@ import PIL.Image
 import json
 import os
 # file imports
-from fn import comma_addremove, configure_for_performance, safeinput
+from fn import configure_for_performance, get_optimizer
 
 image_count = None
 

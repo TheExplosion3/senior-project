@@ -4,10 +4,11 @@ import tensorflow.keras as keras
 import tensorflow_datasets as tfds
 # standard imports
 import matplotlib.pyplot as mplpy
+import time
 import json
 import os
 # file imports
-from fn import comma_addremove, configure_for_performance
+from fn import configure_for_performance, get_optimizer
 
 
 # Variable initialization
@@ -56,9 +57,6 @@ if os.stat("model_save/model.h5").st_size == 0:
   ])
 else:
   model = tf.keras.models.load_model('model_save/model.h5')
-  f = comma_addremove(False, f)
-  json.load(f)
-  f.close()
 
 print("Compiling Model...")
 
@@ -68,11 +66,7 @@ lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
   decay_rate=1,
   staircase=False)
 
-def get_optimizer():
-  return tf.keras.optimizers.experimental.Nadam(lr_schedule)
-
-
-model.compile(optimizer=get_optimizer(),
+model.compile(optimizer=get_optimizer(lr_schedule),
 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy', 'mae'])
 
 print("Model Compiled.")
@@ -90,16 +84,20 @@ _ = mplpy.title(get_label_name(label))
 
 train_ds = configure_for_performance(train_ds)
 test_ds = configure_for_performance(test_ds)
+idx = 0
 
 for image, label in train_ds:  # example is (image, label)
+  idx += 1
   print(image.shape, label)
 
   model.fit(image, label, epochs, steps_per_epoch)
-  
+  if(idx == 1):
+    acc= model.evaluate(image, label, verbose=2)
+    print(f'accuracy: {(100 * acc):5.2f}')
 
-loss, acc = model.evaluate(test_ds)
-print("Accuracy: ", acc)
-print("Loss: " , loss)
+    time.sleep(5)
+
+
 # Adds the correct amount of iterations to the count, amount of times run increases by 1 as well.
 print("Training ended. Creating savepoints.")
 
