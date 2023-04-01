@@ -10,7 +10,7 @@ import time
 import json
 import os
 # file imports
-from fn import configure_for_performance, get_optimizer
+from fn import configure_for_performance, get_optimizer, safeinput
 
 
 # Variable initialization
@@ -97,9 +97,20 @@ print(f'\naverage accuracy: {(np.mean(acc)):5.2f}\n')
 
 ### saving phase ###
 # this code is self explanatory
-print("Saving data...")
-model.save('model_save/model.h5')
-print("Save complete.")
+print("Would you like to save this run? (y/n)")
+usr = ""
+while usr != "y" or usr != "n":
+  if usr == "y":
+    print("Saving data...")
+    model.save('model_save/model.h5')
+    print("Save complete.")
+    break
+  elif usr == "n":
+    print("Skipping saving process...")
+    break
+  else:
+    "Invalid input, please try again."
+    safeinput('s')
 
 # timer concludes, showing total time elapsed for training run
 elapsed_time = datetime.datetime.now()

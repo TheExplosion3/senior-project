@@ -35,3 +35,27 @@ def safeinput(var, vartype):
     except Exception:
         print("Unknown exception occurred.")
   return var
+
+def safeinput(vartype):
+  temp = None
+  while True:
+    try:
+      if vartype == "s":
+        temp = input()
+      elif vartype == "i":
+        temp = int(input())
+      elif vartype == "f":
+        temp = float(input())
+      elif vartype == "b":
+        temp = input()
+        temp = bool(var[0].upper() + var[1:])
+      elif vartype == "c":
+        temp = complex(input())
+      else:
+        raise TypeError
+      break
+    except TypeError:
+        print("Invalid input. Try again.")
+    except Exception:
+        print("Unknown exception occurred.")
+  return temp
