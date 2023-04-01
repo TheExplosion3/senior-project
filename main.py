@@ -67,6 +67,7 @@ if os.stat("model_save/model.h5").st_size == 0:
   ])
 else:
   model = tf.keras.models.load_model('model_save/model.h5')
+  model.summary()
 
 print("Compiling Model...")
 
@@ -81,10 +82,6 @@ loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['
 
 print("Model Compiled.")
 
-if os.stat("model_save/model.h5").st_size != 0:
-  print("Current Model Statistics:")
-  model.summmary()
-
 print(f"Training beginning, running {epochs} epoch(s)")
 
 image, label = next(iter(train_ds))
@@ -95,11 +92,8 @@ test_ds = configure_for_performance(test_ds)
 
 
 model.fit(x=train_ds, epochs=epochs, steps_per_epoch=steps_per_epoch, validation_data=[test_ds])
-acc=model.evaluate(image, label, verbose=2)
-print(f'\naverage accuracy: {(100 * np.mean(acc)):5.2f}\n')
-time.sleep(5)
-
-print("Training ended. Creating savepoints.")
+acc=model.evaluate(train_ds, verbose=2)
+print(f'\naverage accuracy: {(np.mean(acc)):5.2f}\n')
 
 ### saving phase ###
 # this code is self explanatory
@@ -110,4 +104,4 @@ print("Save complete.")
 # timer concludes, showing total time elapsed for training run
 elapsed_time = datetime.datetime.now()
 
-print(f"Total run time: {start_time - elapsed_time}")
+print(f"Total run time: {elapsed_time - start_time}")
