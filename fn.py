@@ -48,7 +48,7 @@ def safeinput(vartype):
         temp = float(input())
       elif vartype == "b":
         temp = input()
-        temp = bool(var[0].upper() + var[1:])
+        temp = bool(temp[0].upper() + temp[1:])
       elif vartype == "c":
         temp = complex(input())
       else:
