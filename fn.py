@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tensorflow.keras as keras
 
 # quite literally just makes the model's optimizer, gives it a learning schedule, then returns it.
 def get_optimizer(lr_schedule):
