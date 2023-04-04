@@ -22,7 +22,7 @@ start_time = datetime.datetime.now()
 # dataset init
 (train_ds, test_ds), metadata = tfds.load(
     'cifar100',
-    split=['train[:80%]', 'test[90%:]'],
+    split=['train[:90%]', 'test[90%:]'],
     with_info=True,
     as_supervised=True,
 )
@@ -58,19 +58,22 @@ while usr != "n" or "1" or "2":
 
     model = tf.keras.Sequential([
         data_augmentation,
-        tf.keras.layers.Input(shape=(32, 32, 3)),
-        tf.keras.layers.Conv2D(4, (3, 3), padding='same', activation='elu',),
+        tf.keras.layers.Conv2D(96, (3, 3), padding='same', activation='elu', input_shape=(32, 32, 3)),
         tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Conv2D(32, (3, 3), padding='same', activation='elu'),
+        tf.keras.layers.Conv2D(96, (3, 3), padding='same', activation='swish', strides=2),
         tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Conv2D(32, (3, 3), padding='same', activation='elu'),
+        tf.keras.layers.SpatialDropout2D(0.2),
+        tf.keras.layers.Conv2D(192, (3, 3), padding='same', activation='swish'),
+        tf.keras.layers.MaxPooling2D((2, 2)),
+        tf.keras.layers.Conv2D(192, (3, 3), padding='same', activation='swish', strides=2),
+        tf.keras.layers.SpatialDropout2D(0.2),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(37, activation='leaky_relu'),
+        tf.keras.layers.Dense(37, activation='relu'),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(38, activation='leaky_relu'),
+        tf.keras.layers.Dense(38, activation='relu'),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(num_classes, activation='sigmoid')
+        tf.keras.layers.Dense(num_classes, activation='softmax')
         ])
     break
   elif usr == "1" or "2":
