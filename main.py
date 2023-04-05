@@ -6,6 +6,7 @@ import tensorflow_datasets as tfds
 import matplotlib.pyplot as mplpy
 import numpy as np
 import datetime
+import time
 import os
 # file imports
 from fn import configure_for_performance, get_optimizer, safeinput
@@ -35,8 +36,10 @@ f, model = None, None
 
 print("Which version would you like to use, or would you like to recompile the model? Type a number, or n for new.")
 usr = None
+
 while usr != "n" or "1" or "2":
   usr = safeinput('s')
+
 # checks if the model has been created in the past, if not then it creates it on the spot.
 # this network is convolutional, as shown by the first parts.
   if os.stat("model_save/model.h5").st_size == 0 and usr == "n":
@@ -76,10 +79,12 @@ while usr != "n" or "1" or "2":
   elif usr == "1" or "2":
     model = tf.keras.models.load_model(f'model_save/modelv{usr}.h5')
     model.summary()
+    time.sleep(2)
     break
   else:
     print("Invalid input, please try again.")
 
+mdln = usr
 
 print("Compiling Model...")
 
@@ -109,6 +114,7 @@ print(f'\naverage accuracy : {(np.mean(acc)):5.2f}\n')
 mplpy.style.use('ggplot')
 mplpy.plot(history.history['loss'], label = 'loss')
 mplpy.plot(history.history['val_loss'], label='val loss')
+mplpy.plot(history.history['val_accuracy'], label= "val_accuracy")
 mplpy.title("Loss vs Val_Loss")
 mplpy.xlabel("Epochs")
 mplpy.ylabel("Loss")
@@ -123,7 +129,12 @@ while usr != "y" or usr != "n":
   usr = safeinput('s')
   if usr == "y":
     print("Saving data...")
-    model.save('model_save/model.h5')
+    if mdln == "n":
+      model.save('model_save/model.h5')
+    elif mdln == "1":
+      model.save('model_save/modelv1.h5')
+    elif mdln == "2":
+      model.save('model_save/modelv2.h5')
     print("Save complete.")
     break
   elif usr == "n":
