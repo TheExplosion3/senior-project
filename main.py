@@ -32,10 +32,9 @@ batch_size = 8
 steps_per_epoch = len(train_ds)//batch_size
 
 # empty variables due to how python clears memory based upon scope
-f, model = None, None
+f, model, usr = None, None, None
 
 print("Which version would you like to use, or would you like to recompile the model? Type a number, or n for new.")
-usr = None
 
 while usr != "n" or "1" or "2":
   usr = safeinput('s')
@@ -44,6 +43,7 @@ while usr != "n" or "1" or "2":
 # this network is convolutional, as shown by the first parts.
   if os.stat("model_save/model.h5").st_size == 0 and usr == "n":
 
+    # augmentation helps to prevent against overfitting
     data_augmentation = keras.Sequential(
       [
         tf.keras.layers.RandomFlip("horizontal", input_shape=(32,32,3)),
@@ -52,6 +52,7 @@ while usr != "n" or "1" or "2":
       ]
     )
 
+    # main model section, first it augments data to make it just a bit harder for itself (will most likely eventually remove it when actually utilizing it.), then it goes through the convolutional section to extract features, then finally uses the hidden layers to determine its confidence in which label it is, and then returns the answer with softmax.
     model = tf.keras.Sequential([
         data_augmentation,
         tf.keras.layers.Conv2D(96, (3, 3), padding='same', activation='elu', input_shape=(32, 32, 3)),
@@ -84,16 +85,19 @@ while usr != "n" or "1" or "2":
   else:
     print("Invalid input, please try again.")
 
+# this will be important later
 mdln = usr
 
 print("Compiling Model...")
 
+# learning schedule, decreases the rate at which learning occurs to prevent overfitting, slowly tapering off as it progresses through the epoch
 lr_schedule = tf.keras.optimizers.schedules.InverseTimeDecay(
   0.001,
   decay_steps=steps_per_epoch*1000,
   decay_rate=1,
   staircase=False)
 
+# compiles model, with NAdam optimizer as defined in the fn.py file, as well as defining loss via SCC.
 model.compile(optimizer=get_optimizer(lr_schedule),
 loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), metrics=['accuracy', 'mae'])
 
@@ -106,18 +110,18 @@ train_ds = configure_for_performance(train_ds)
 test_ds = configure_for_performance(test_ds)
 
 # training loop. this code starts with an image, then it takes a label as well, and checks whether or not the image is that label. after looping through, it shows avg. accuracy, then waits 5 seconds, then proceeds.
-
 history = model.fit(x=train_ds, epochs=epochs, steps_per_epoch=steps_per_epoch, validation_data=[test_ds])
 loss, acc, mse=model.evaluate(train_ds, verbose=2)
 print(f'\naverage accuracy : {(np.mean(acc)):5.2f}\n')
 
+# shows a graph of training statistics
 mplpy.style.use('ggplot')
 mplpy.plot(history.history['loss'], label = 'loss')
 mplpy.plot(history.history['val_loss'], label='val loss')
 mplpy.plot(history.history['val_accuracy'], label= "val_accuracy")
-mplpy.title("Loss vs Val_Loss")
+mplpy.title("Statistics")
 mplpy.xlabel("Epochs")
-mplpy.ylabel("Loss")
+mplpy.ylabel("Loss/Accuracy")
 mplpy.legend()
 mplpy.show()
 

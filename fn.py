@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow.keras as keras
 
-# quite literally just makes the model's optimizer, gives it a learning schedule, then returns it.
+# quite literally just makes the model's optimizer, gives it a learning schedule defined in the passthrough, then returns it.
 def get_optimizer(lr_schedule):
   return tf.keras.optimizers.experimental.Nadam(lr_schedule)
 
@@ -13,7 +13,7 @@ def configure_for_performance(ds):
   ds = ds.prefetch(buffer_size=tf.data.AUTOTUNE)
   return ds
 
-# a function that makes sure all user input is safe, and is not of an invalid type. the code will handle it by erroring out, at the moment.
+# a function that makes sure all user input is safe, and is not of an invalid type. the code will handle it by erroring out.
 def safeinput(var, vartype):
   while True:
     try:
@@ -37,6 +37,7 @@ def safeinput(var, vartype):
         print("Unknown exception occurred.")
   return var
 
+# a function that makes sure all user input is safe, and is not of an invalid type. if invalid, the process will error out. this type does not require an input of a variable, for use in defining another variable.
 def safeinput(vartype):
   temp = None
   while True:
