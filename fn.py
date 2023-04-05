@@ -9,7 +9,7 @@ def get_optimizer(lr_schedule):
 def configure_for_performance(ds):
   ds = ds.cache()
   ds = ds.shuffle(buffer_size=1000)
-  ds = ds.batch(5)
+  ds = ds.batch(8)
   ds = ds.prefetch(buffer_size=tf.data.AUTOTUNE)
   return ds
 

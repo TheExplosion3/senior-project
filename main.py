@@ -2,7 +2,6 @@
 import tensorflow as tf
 import tensorflow.keras as keras
 import tensorflow_datasets as tfds
-import keras_tuner as kt
 # standard imports
 import matplotlib.pyplot as mplpy
 import numpy as np
@@ -30,7 +29,7 @@ start_time = datetime.datetime.now()
 # other important stuff
 num_classes = metadata.features['label'].num_classes
 epochs = 10
-batch_size = 5
+batch_size = 8
 steps_per_epoch = len(train_ds)//batch_size
 
 # empty variables due to how python clears memory based upon scope
@@ -42,10 +41,6 @@ while usr != "n" or "1" or "2":
   usr = safeinput('s')
 # checks if the model has been created in the past, if not then it creates it on the spot.
 # this network is convolutional, as shown by the first parts.
-# stats:
-# amt of nodes on input layer: 4
-# amt of nodes per hidden layer: 37/38
-# amt of nodes on output layer: 100
   if os.stat("model_save/model.h5").st_size == 0 and usr == "n":
 
     data_augmentation = keras.Sequential(
@@ -54,24 +49,28 @@ while usr != "n" or "1" or "2":
         tf.keras.layers.RandomRotation(0.1),
         tf.keras.layers.RandomZoom(0.1),
       ]
-    ) 
+    )
 
     model = tf.keras.Sequential([
         data_augmentation,
         tf.keras.layers.Conv2D(96, (3, 3), padding='same', activation='elu', input_shape=(32, 32, 3)),
         tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Conv2D(96, (3, 3), padding='same', activation='swish', strides=2),
+        tf.keras.layers.Conv2D(96, (3, 3), padding='same', strides=2),
         tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.SpatialDropout2D(0.2),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.LeakyReLU(),
         tf.keras.layers.Conv2D(192, (3, 3), padding='same', activation='swish'),
         tf.keras.layers.MaxPooling2D((2, 2)),
-        tf.keras.layers.Conv2D(192, (3, 3), padding='same', activation='swish', strides=2),
-        tf.keras.layers.SpatialDropout2D(0.2),
+        tf.keras.layers.Conv2D(192, (3, 3), padding='same', strides=2),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.LeakyReLU(),
         tf.keras.layers.Flatten(),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(37, activation='relu'),
+        tf.keras.layers.Dense(512, activation='leaky_relu'),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(38, activation='relu'),
+        tf.keras.layers.Dense(256, activation='leaky_relu'),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(128, activation='leaky_relu'),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(num_classes, activation='softmax')
         ])
@@ -121,9 +120,9 @@ mplpy.show()
 ### saving phase ###
 # this code is self explanatory
 print("Would you like to save this run? (y/n)")
-usr = safeinput('s')
 
 while usr != "y" or usr != "n":
+  usr = safeinput('s')
   if usr == "y":
     print("Saving data...")
     model.save('model_save/model.h5')
@@ -133,7 +132,7 @@ while usr != "y" or usr != "n":
     print("Skipping saving process...")
     break
   else:
-    "Invalid input, please try again."
+    print("Invalid input, please try again.")
     safeinput('s')
 
 # timer concludes, showing total time elapsed for training run
