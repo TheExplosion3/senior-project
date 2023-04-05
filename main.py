@@ -6,8 +6,6 @@ import tensorflow_datasets as tfds
 import matplotlib.pyplot as mplpy
 import numpy as np
 import datetime
-import time
-import json
 import os
 # file imports
 from fn import configure_for_performance, get_optimizer, safeinput
