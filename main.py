@@ -36,11 +36,12 @@ f, model, usr = None, None, None
 
 print("Which version would you like to use, or would you like to recompile the model? Type a number, or n for new.")
 
+# input for the code, explained in the next section
 while usr != "n" or "1" or "2":
   usr = safeinput('s')
 
 # checks if the model has been created in the past, if not then it creates it on the spot.
-# this network is convolutional, as shown by the first parts.
+# this network is convolutional, as shown by the first 2/3rds of the actual layers.
   if os.stat("model_save/model.h5").st_size == 0 and usr == "n":
 
     # augmentation helps to prevent against overfitting
@@ -105,6 +106,7 @@ print("Model Compiled.")
 
 print(f"Training beginning, running {epochs} epoch(s)")
 
+# data configuration, function actions are defined later on, image and label *MIGHT* be old code, but I think they're still used somewhere. gonna check that later.
 image, label = next(iter(train_ds))
 train_ds = configure_for_performance(train_ds)
 test_ds = configure_for_performance(test_ds)
@@ -116,9 +118,10 @@ print(f'\naverage accuracy : {(np.mean(acc)):5.2f}\n')
 
 # shows a graph of training statistics
 mplpy.style.use('ggplot')
-mplpy.plot(history.history['loss'], label = 'loss')
-mplpy.plot(history.history['val_loss'], label='val loss')
-mplpy.plot(history.history['val_accuracy'], label= "val_accuracy")
+mplpy.plot(history.history['loss'], label ='loss')
+mplpy.plot(history.history['val_loss'], label='val_loss')
+mplpy.plot(history.history['accuracy'], label='accuracy')
+mplpy.plot(history.history['val_accuracy'], label="val_accuracy")
 mplpy.title("Statistics")
 mplpy.xlabel("Epochs")
 mplpy.ylabel("Loss/Accuracy")
@@ -126,9 +129,9 @@ mplpy.legend()
 mplpy.show()
 
 ### saving phase ###
-# this code is self explanatory
 print("Would you like to save this run? (y/n)")
 
+# uses mdln var to determine  which model file to save to, if the user wants to save the given training run.
 while usr != "y" or usr != "n":
   usr = safeinput('s')
   if usr == "y":
