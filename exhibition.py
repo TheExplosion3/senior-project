@@ -1,39 +1,45 @@
 # tensorflow imports
 import tensorflow as tf
-import tensorflow.keras as keras
-from tensorflow.keras.models import Model
-import tensorflow_datasets as tfds
 # standard imports
-import matplotlib as mpl
 import matplotlib.pyplot as mplpy
+import numpy as np
 import PIL
 import PIL.Image
-import json
-import os
-# file imports
-from fn import configure_for_performance, get_optimizer
-
-image_count = None
-
-list_ds = tf.data.Dataset.list_files(str(), shuffle=False)
-list_ds = list_ds.shuffle(image_count, reshuffle_each_iteration=False)
-
-val_size = int(image_count * 0.2)
-test_ds = list_ds.skip(val_size)
-val_ds = list_ds.take(val_size)
 
 model = tf.keras.models.load_model('model_save/model.h5')
-temp_layer_storage = None
-train_layers = False
 
-if(len(model) == 10):
+print("Select an image, in the format of /x/y/z.png")
+usr = input()
 
-    temp_layer_storage = model[:2]
-    model = model[2:]
-    train_layers = True
+image = PIL.Image.open(usr)
+tf_payload = tf.keras.preprocessing.image.load_img(usr)
 
+arr = model.predict(tf_payload, verbose=2)
+arridx = None
 
-if(train_layers == True):
-    model = temp_layer_storage + model
-
-
+high = 0
+current = 0
+highdx = 0
+for i in arr:
+    if i < high:
+        high = i
+        highdx = current
+        arridx = None
+    elif i == high:
+        if arridx is None:
+            arridx = np.arr([highdx, current])
+        else:
+            np.append(arridx, current)
+    current += 1
+if arridx is None:
+    mplpy.figure(figsize=(10, 10))
+    mplpy.imshow(image.numpy().astype("uint8"))
+    mplpy.title(image.filename + " Network Prediction")
+    mplpy.suptitle(f"Network states: {arr[highdx]}, confidence: {arr[high]}")
+    mplpy.axis("off")
+else:
+    mplpy.figure(figsize=(10, 10))
+    mplpy.imshow(image.numpy().astype("uint8"))
+    mplpy.title(image.filename + " Network Prediction")
+    mplpy.suptitle(f"Network states: Multiple answers, as follows: {arridx}, confidence: {high}")
+    mplpy.axis("off")
